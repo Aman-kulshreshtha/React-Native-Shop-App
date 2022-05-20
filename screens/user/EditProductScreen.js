@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useReducer } from "react";
 import {
   View,
   ScrollView,
@@ -10,22 +10,71 @@ import {
   Button,
   Alert,
 } from "react-native";
+
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-
 import HeaderButton from "../../components/UI/HeaderButton";
 import { addProduct, editProduct } from "../../store/actions/product";
+
+const INPUT_UPDATE = "UPDATE";
+
+// const formReducer = (state, action) => {
+//   if (action.type === INPUT_UPDATE) {
+//     console.log("Hi");
+//     const updatedValue = {
+//       ...state.inputValues,
+//       [action.input]: action.value,
+//     };
+
+//     const updatedValidities = {
+//       ...state.inputValidities,
+//       [action.input]: action.isValid,
+//     };
+//     console.log(updatedValue);
+
+//     let formIsValid = true;
+
+//     for (let key in updatedValidities) {
+//       formIsValid = formIsValid && updatedValidities[key];
+//     }
+
+//     return {
+//       inputValue: updatedValue,
+//       inputValidities: updatedValidities,
+//       formIsValid: formIsValid,
+//     };
+//   }
+//   return state;
+// };
 
 const EditProductScreen = (props) => {
   const dispatch = useDispatch();
   const prodId = props.route.params.pid;
+
   const [error, setError] = useState(false);
   const editedProduct = useSelector((state) =>
     state.products.userProducts.find((prod) => prod.id === prodId)
   );
 
+  // const [formState, dispatchFormState] = useReducer(formReducer, {
+  //   inputValues: {
+  //     title: editedProduct ? editedProduct.title : "",
+  //     imageUrl: editedProduct ? editedProduct.imageUrl : "",
+  //     price: "",
+  //     description: editedProduct ? editedProduct.description : "",
+  //   },
+  //   inputValidities: {
+  //     title: editedProduct ? true : false,
+  //     imageUrl: editedProduct ? true : false,
+  //     price: editedProduct ? true : false,
+  //     description: editedProduct ? true : false,
+  //   },
+  //   formIsValid: editedProduct ? true : false,
+  // });
+
   const [title, setTitle] = useState(editedProduct ? editedProduct.title : "");
+
   const [imageUrl, setImageUrl] = useState(
     editedProduct ? editedProduct.imageUrl : ""
   );
@@ -33,6 +82,21 @@ const EditProductScreen = (props) => {
   const [description, setDescription] = useState(
     editedProduct ? editedProduct.description : ""
   );
+
+  const userId = useSelector((state) => state.auth.userId);
+
+  // const textChangeHandler = (inputIdentifier, text) => {
+  //   let isValid = false;
+  //   if (text.trim().length > 0) {
+  //     isValid = true;
+  //   }
+  //   dispatchFormState({
+  //     type: INPUT_UPDATE,
+  //     value: text,
+  //     isValid: isValid,
+  //     input: inputIdentifier,
+  //   });
+  // };
 
   const showAlert = () => {
     Alert.alert("Confirmation", "Are you sure?", [
@@ -44,36 +108,30 @@ const EditProductScreen = (props) => {
       {
         text: "OK",
         onPress: async () => {
-          try {
-            if (!editedProduct) {
-              try {
-                await dispatch(
-                  addProduct(
-                    new Date().toString(),
-                    "u1",
-                    title,
-                    imageUrl,
-                    description,
-                    +price
-                  )
-                );
-              } catch (err) {
-                () => {
-                  setError(true);
-                };
-              }
-            } else {
-              try {
-                await dispatch(
-                  editProduct(prodId, title, imageUrl, description)
-                );
-              } catch (err) {
-                setError(true);
-              }
+          if (!editedProduct) {
+            try {
+              await dispatch(
+                addProduct(
+                  new Date().toString(),
+                  userId,
+                  title,
+                  imageUrl,
+                  description,
+                  +price
+                )
+              );
+
+              props.navigation.goBack();
+            } catch (err) {
+              Alert.alert("An error occured", err.message, [{ title: "okay" }]);
             }
-            props.navigation.goBack();
-          } catch (error) {
-            console.log("error");
+          } else {
+            try {
+              await dispatch(editProduct(prodId, title, imageUrl, description));
+              props.navigation.goBack();
+            } catch (err) {
+              Alert.alert("An error occured", err.message, [{ title: "okay" }]);
+            }
           }
         },
       },
@@ -83,7 +141,7 @@ const EditProductScreen = (props) => {
   if (error) {
     return (
       <View>
-        <Text>SOmething is not right</Text>
+        <Text>Something is not right</Text>
       </View>
     );
   }
@@ -127,13 +185,21 @@ const EditProductScreen = (props) => {
           />
         </View>
       </View>
-
-      <Button title="confirm" onPress={showAlert} />
+      <View style={styles.btn}>
+        <Button title="confirm" onPress={showAlert} color={"#c2185b"} />
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  btn: {
+    marginVertical: 8,
+
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   center: {
     flex: 1,
     justifyContent: "center",
@@ -147,6 +213,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginVertical: 8,
+    fontWeight: "700",
   },
   input: {
     paddingHorizontal: 2,

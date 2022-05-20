@@ -5,13 +5,17 @@ import {
   StyleSheet,
   Button,
   ActivityIndicator,
+  Alert,
 } from "react-native";
+
 import { useDispatch, useSelector } from "react-redux";
 import OrderItem from "../../components/shop/OrderItem";
 import { useState, useCallback, useEffect } from "react";
 import { fetchOrders } from "../../store/actions/Order";
+
 const OrderScreen = (props) => {
   const orders = useSelector((state) => state.orders.orders);
+
   const [isError, setIsError] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,24 +24,36 @@ const OrderScreen = (props) => {
   const loadOrders = useCallback(async () => {
     setIsError(false);
     setIsRefreshing(true);
+
     try {
       await dispatch(fetchOrders());
     } catch (err) {
+      console.log(err);
       setIsError(true);
+      Alert.alert("An Error Occurred", err, [{ title: "okay" }]);
     }
 
     setIsRefreshing(false);
   }, [dispatch, setIsError, setIsRefreshing]);
 
-  // console.log("current state of orders ", orders);
   useEffect(() => {
     try {
       setIsLoading(true);
       loadOrders().then(() => setIsLoading(false));
     } catch (err) {
+      console.log(err);
       setIsError(true);
+      Alert.alert("An Error Occurred", err, [{ title: "okay" }]);
     }
   }, [loadOrders, setIsError, setIsLoading]);
+
+  if (isLoading) {
+    return (
+      <View style={style.center}>
+        <ActivityIndicator color={"#c2185b"} size="large" />
+      </View>
+    );
+  }
 
   if (isError) {
     return (
@@ -46,14 +62,6 @@ const OrderScreen = (props) => {
         <View style={style.btn}>
           <Button title="Try Again !" color={"#c2186b"} onPress={loadOrders} />
         </View>
-      </View>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <View style={style.center}>
-        <ActivityIndicator color={"#c2185b"} size="large" />
       </View>
     );
   }

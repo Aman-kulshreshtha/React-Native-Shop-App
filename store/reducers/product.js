@@ -9,7 +9,7 @@ import {
 import { SET_PRODUCTS } from "../actions/product.js";
 const initialState = {
   availableProducts: PRODUCTS,
-  userProducts: PRODUCTS.filter((prod) => prod.ownerId === "u1"),
+  userProducts: [],
 };
 
 export default (state = initialState, action) => {
@@ -18,7 +18,9 @@ export default (state = initialState, action) => {
       return {
         ...state,
         availableProducts: action.products,
-        userProducts: action.products.filter((prod) => prod.ownerId === "u1"),
+        userProducts: action.products.filter(
+          (prod) => prod.ownerId === action.userId
+        ),
       };
 
     case ADD_PRODUCT:
@@ -34,7 +36,7 @@ export default (state = initialState, action) => {
 
       const newAvailableProducts = [...state.availableProducts, newProduct];
       const newUserProducts = newAvailableProducts.filter(
-        (prod) => prod.ownerId === "u1"
+        (prod) => prod.ownerId === action.userId
       );
       return {
         ...state,
@@ -44,7 +46,6 @@ export default (state = initialState, action) => {
 
     case EDIT_PRODUCT:
       const updated = [...state.availableProducts];
-
       const title = action.product.title;
       const id = action.product.id;
       const imageUrl = action.product.imageUrl;
@@ -59,7 +60,9 @@ export default (state = initialState, action) => {
         }
       }
 
-      const updatedUser = updated.filter((prod) => prod.ownerId === "u1");
+      const updatedUser = updated.filter(
+        (prod) => prod.ownerId === action.userId
+      );
 
       return {
         ...state,

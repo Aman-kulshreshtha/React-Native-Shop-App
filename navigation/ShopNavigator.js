@@ -1,5 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import ProductsOverviewScreen from "../screens/shop/ProductsOverviewScreen";
+import { DrawerContentScrollView } from "@react-navigation/drawer";
 import ProductDetail from "../screens/shop/ProductDetail";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,14 +12,50 @@ import Order from "../models/Order";
 import UserProductScreen from "../screens/user/UserProductsScreen";
 const Stack = createStackNavigator();
 import EditProductScreen from "../screens/user/EditProductScreen";
+import { useState } from "react";
+import AuthScreen from "../screens/user/AuthScreen";
+import { useDispatch, useSelector } from "react-redux";
+
+import { Button } from "react-native";
+import { logOut } from "../store/actions/auth";
+import { DrawerItemList } from "@react-navigation/drawer";
+import { DrawerItem } from "@react-navigation/drawer";
+import { View, Text } from "react-native";
+
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigation() {
+  const dispatch = useDispatch();
   return (
     <Drawer.Navigator
       initialRouteName="Home"
       options={{
         title: "Home",
+      }}
+      drawerContent={(props) => {
+        return (
+          <DrawerContentScrollView {...props}>
+            <DrawerItemList {...props} />
+            <View
+              style={{
+                margin: 8,
+                borderRadius: 10,
+                justifyContent: "center",
+              }}
+            >
+              <DrawerItem
+                label="Logout"
+                labelStyle={{
+                  color: "#c2185b",
+                  flex: 1,
+                  fontSize: 16,
+                  fontWeight: "600",
+                }}
+                onPress={() => dispatch(logOut())}
+              />
+            </View>
+          </DrawerContentScrollView>
+        );
       }}
     >
       <Drawer.Screen
@@ -147,11 +184,6 @@ function AdminNavigation() {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          headerRight: () => (
-            <HeaderButtons HeaderButtonComponent={HeaderButton}>
-              <Item title="Header" iconName="checkmark-circle" />
-            </HeaderButtons>
-          ),
         })}
       />
     </Stack.Navigator>
@@ -159,7 +191,16 @@ function AdminNavigation() {
 }
 
 function ShopNavigator() {
-  return (
+  // const auth = useSelector((state) => state.auth.token);
+  // if (auth) console.log(auth);
+  // else console.log("No token present");
+
+  const isLoggedIn = useSelector((state) => {
+    //console.log("state: from navigation ", state);
+    return state.auth.isLoggedIn;
+  });
+
+  return isLoggedIn ? (
     <Stack.Navigator>
       <Stack.Screen
         name="Home"
@@ -208,11 +249,7 @@ function ShopNavigator() {
           headerStyle: {
             backgroundColor: "#c2185b",
           },
-          headerRight: () => (
-            <HeaderButtons HeaderButtonComponent={HeaderButton}>
-              <Item title="Header" iconName="md-checkbox" onPress={() => {}} />
-            </HeaderButtons>
-          ),
+
           headerTintColor: "#fff",
           headerTitleStyle: {
             fontWeight: "bold",
@@ -233,6 +270,14 @@ function ShopNavigator() {
             fontWeight: "bold",
           },
         }}
+      />
+    </Stack.Navigator>
+  ) : (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Authentication"
+        component={AuthScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

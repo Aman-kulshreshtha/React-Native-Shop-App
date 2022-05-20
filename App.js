@@ -12,6 +12,7 @@ import { LogBox } from "react-native";
 
 import ReduxThunk from "redux-thunk";
 import OrdersReducer from "./store/reducers/Orders";
+import AuthReducer from "./store/reducers/auth";
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   products: ProductsReducer,
   cart: cartReducer,
   orders: OrdersReducer,
+  auth: AuthReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

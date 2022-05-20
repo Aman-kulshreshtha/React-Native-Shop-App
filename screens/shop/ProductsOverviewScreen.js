@@ -103,6 +103,9 @@ export default function ProductsOverviewScreen(props) {
               color={"#c2185b"}
               title="Add to Cart"
               onPress={() => {
+                Alert.alert("Success", "item added to cart", [
+                  { title: "okay" },
+                ]);
                 dispatch(cartAction.addToCart(itemData.item));
               }}
             />

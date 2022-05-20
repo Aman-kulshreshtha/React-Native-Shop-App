@@ -1,44 +1,49 @@
 import React, { useState } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 
 import CartItem from "./CartItem";
 
 const OrderItem = (props) => {
   const [showDetails, setShowDetails] = useState(false);
   const items = props.items;
-  //console.log(items);
+
   const itemsArray = [];
 
   for (let key in items) {
-    itemsArray.push(items[key]);
+    itemsArray.push({ item: items[key], key });
   }
-
-  console.log(itemsArray);
 
   return (
     <View style={styles.orderItem}>
       <View style={styles.summary}>
         <Text style={styles.totalAmount}>${props.amount.toFixed(2)}</Text>
+        <Text style={styles.date}>On way</Text>
         <Text style={styles.date}>{props.date}</Text>
       </View>
-      <Button
-        color={"#c5128b"}
-        title={showDetails ? "Hide Details" : "Show Details"}
-        onPress={() => {
-          setShowDetails((prevState) => !prevState);
-        }}
-      />
+      <View style={styles.btn}>
+        <Button
+          color={"#c2185b"}
+          title={showDetails ? "Hide Details" : "Show Details"}
+          onPress={() => {
+            setShowDetails((prevState) => !prevState);
+          }}
+        />
+      </View>
       {showDetails && (
         <View style={styles.detailItems}>
-          {itemsArray.map((cartItem) => (
-            <CartItem
-              showDelete={false}
-              key={cartItem.productId}
-              qty={cartItem.quantity}
-              amount={cartItem.sum}
-              title={cartItem.productTitle}
-            />
-          ))}
+          <FlatList
+            data={itemsArray}
+            renderItem={(itemData) => (
+              <CartItem
+                showDelete={false}
+                key={itemData.item.item.productId}
+                qty={itemData.item.item.quantity}
+                amount={itemData.item.item.sum}
+                title={itemData.item.item.productTitle}
+              />
+            )}
+          />
         </View>
       )}
     </View>
@@ -46,6 +51,9 @@ const OrderItem = (props) => {
 };
 
 const styles = StyleSheet.create({
+  btn: {
+    marginVertical: 8,
+  },
   orderItem: {
     shadowColor: "black",
     shadowOpacity: 0.26,

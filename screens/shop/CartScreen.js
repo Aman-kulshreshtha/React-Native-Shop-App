@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import CartItem from "../../components/shop/CartItem";
 import { useSelector } from "react-redux";
@@ -23,14 +24,23 @@ const CartScreen = (props) => {
 
   const addOrd = async () => {
     setIsLoading(true);
-
     try {
       await dispatch(addOrder(cart, total));
     } catch (err) {
+      Alert.alert(
+        "Something went wrong ",
+        "unable to add your orders right now",
+        [{ title: "okay" }]
+      );
       console.log(err);
     }
 
     setIsLoading(false);
+    Alert.alert(
+      "Woohooo",
+      "Your order is on it's way and will be delievered to you shortly",
+      [{ title: "okay" }]
+    );
   };
 
   let keys = Object.keys(cart);

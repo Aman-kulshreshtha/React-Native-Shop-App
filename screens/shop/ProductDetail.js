@@ -5,9 +5,10 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import * as cartAction from "../../store/actions/cart";
 
 export default ProductDetail = (props) => {
@@ -24,27 +25,45 @@ export default ProductDetail = (props) => {
         <Image style={style.image} source={{ uri: product[0].imageUrl }} />
       </View>
 
-      <Text style={style.heading}>{product[0].title}</Text>
+      <View style={style.detailContainer}>
+        <Text style={style.heading}>{product[0].title}</Text>
 
-      <Text style={style.desc}>{product[0].description}</Text>
+        <Text style={style.desc}>{product[0].description}</Text>
 
-      <View style={style.btn_container}>
-        <Button color = {"#c2185b"} title={"Add to Cart"} onPress={()=> dispatch(cartAction.addToCart(product[0]))} />
+        <View style={style.btn_container}>
+          <Button
+            color={"#c2185b"}
+            title={"Add to Cart"}
+            onPress={() => {
+              Alert.alert("Success", "item added to cart", [{ title: "okay" }]);
+              dispatch(cartAction.addToCart(product[0]));
+            }}
+          />
+        </View>
       </View>
     </ScrollView>
   );
 };
 
 const style = StyleSheet.create({
+  detailContainer: {
+    elevation: 5,
+    margin: 16,
+    padding: 8,
+    backgroundColor: "white",
+    borderRadius: 10,
+  },
   btn_container: {
-    marginVertical: 10,
+    margin: 30,
     alignItems: "center",
   },
   desc: {
     marginHorizontal: 20,
+    padding: 10,
+    fontSize: 16,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 10,
